@@ -65,8 +65,10 @@ pub async fn generate_audio(
                 }
                 
             };
-            convert_audio(&core, problem, gen_config.speed_scale, &gen_config.output_path)
-                .expect("failed to convert audio");
+            convert_audio(
+                &core, problem, gen_config.speed_scale, &gen_config.output_path,
+                &app_handle, gen_config.count_problems
+            ).expect("failed to convert audio");
         }
 
         // emit

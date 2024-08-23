@@ -1,3 +1,4 @@
+use tauri::Manager;
 use vvcapi::VoicevoxCore;
 use yomiage;
 use hound::{WavReader, WavWriter};
@@ -9,13 +10,23 @@ pub fn convert_audio(
     yp: yomiage::Problem,
     speed_scale: f64,
     output_path: &str,
+    app_handle: &tauri::AppHandle,
+    count_problems: u32,
 ) -> Result<(), String> {
     let speaker_id = 13;
 
     if !core.is_model_loaded(speaker_id) {
         println!("Loading model...");
+        app_handle.emit_all(
+            "progress",
+            "モデルをロード中...",
+        ).unwrap();
         core.load_model(13).unwrap();
         println!("Model loaded");
+        app_handle.emit_all(
+            "progress",
+            format!("生成中... 0/{}", count_problems),
+        ).unwrap();
     }
 
     let mut path = std::path::PathBuf::from(output_path);
