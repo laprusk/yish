@@ -4,7 +4,6 @@
 mod commands;
 mod convert_audio;
 
-use std::sync::Arc;
 use tauri::Manager;
 use vvcapi::{VoicevoxCore, InitializeOptions};
 
@@ -17,12 +16,12 @@ fn greet(name: &str) -> String {
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let core = Arc::new(VoicevoxCore::new(
+            let core = VoicevoxCore::new(
                 InitializeOptions {
                     open_jtalk_dict_dir: "./open_jtalk_dic_utf_8-1.11".to_string(),
                     ..Default::default()
                 }
-            ).expect("failed to initialize VoicevoxCore"));
+            ).expect("failed to initialize VoicevoxCore");
             println!("Voicevox Core version: {}", core.get_version());
 
             app.manage(core);
