@@ -6,14 +6,14 @@ use chrono::Local;
 use std::io::Cursor;
 
 pub fn convert_audio(
-    core: &VoicevoxCore,
+    app_handle: &tauri::AppHandle,
     yp: yomiage::Problem,
     speed_scale: f64,
     output_path: &str,
-    app_handle: &tauri::AppHandle,
     count_problems: u32,
 ) -> Result<(), String> {
     let speaker_id = 13;
+    let core = app_handle.state::<VoicevoxCore>();
 
     if !core.is_model_loaded(speaker_id) {
         println!("Loading model...");

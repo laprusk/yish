@@ -1,5 +1,3 @@
-use std::sync::Arc;
-use vvcapi::VoicevoxCore;
 use serde::{Serialize, Deserialize};
 use tauri::Manager;
 use crate::convert_audio::convert_audio;
@@ -25,11 +23,9 @@ pub fn get_default_path() -> String {
 pub async fn generate_audio(
     yomiage_config: yomiage::Config,
     gen_config: GenConfig,
-    core: tauri::State<'_, Arc<VoicevoxCore>>,
     app_handle: tauri::AppHandle,
 ) -> Result<(), tauri::Error> {
     println!("Generating audio...");
-    let core = Arc::clone(&core);
     tauri::async_runtime::spawn(async move {
         let subtractions = if gen_config.gen_type == 0 {
             0
@@ -66,8 +62,7 @@ pub async fn generate_audio(
                 
             };
             convert_audio(
-                &core, problem, gen_config.speed_scale, &gen_config.output_path,
-                &app_handle, gen_config.count_problems
+                &app_handle, problem, gen_config.speed_scale, &gen_config.output_path, gen_config.count_problems
             ).expect("failed to convert audio");
         }
 
