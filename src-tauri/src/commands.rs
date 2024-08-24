@@ -1,13 +1,14 @@
 use serde::{Serialize, Deserialize};
 use tauri::Manager;
+use chrono::Local;
 use crate::convert_audio::convert_audio;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GenConfig {
-    count_problems: u32,
-    gen_type: u32,
-    speed_scale: f64,
-    output_path: String,
+    pub count_problems: u32,
+    pub gen_type: u32,
+    pub speed_scale: f64,
+    pub output_path: String,
 }
 
 #[tauri::command]
@@ -32,6 +33,8 @@ pub async fn generate_audio(
         } else {
             yomiage_config.subtractions
         };
+        
+        let dir_name = get_dir_name(yomiage_config);
 
         for i in 0..gen_config.count_problems {
             // emit
@@ -61,8 +64,10 @@ pub async fn generate_audio(
                 }
                 
             };
+            
+            let file_name = get_file_name(problem.config.subtractions, i + 1);
             convert_audio(
-                &app_handle, problem, gen_config.speed_scale, &gen_config.output_path, gen_config.count_problems
+                &app_handle, problem, gen_config.clone(), &dir_name, &file_name
             ).expect("failed to convert audio");
         }
 
@@ -75,4 +80,27 @@ pub async fn generate_audio(
 
     println!("Audio generated!");
     Ok(())
+}
+
+fn get_timestamp() -> String {
+    Local::now().format("%Y%m%d%H%M%S").to_string()
+}
+
+fn get_dir_name(yomiage_config: yomiage::Config) -> String {
+    format!("{}-{}-{}-{}",
+        yomiage_config.min_digit,
+        yomiage_config.max_digit,
+        yomiage_config.length,
+        get_timestamp()
+    )
+}
+
+fn get_file_name(subtractions: u32, i: u32) -> String {
+    let problem_type = if subtractions == 0 {
+        String::from("加算")
+    } else {
+        String::from("加減算")
+    };
+
+    format!("{}-{}.wav", i, problem_type)
 }

@@ -4,13 +4,14 @@ use yomiage;
 use hound::{WavReader, WavWriter};
 use chrono::Local;
 use std::io::Cursor;
+use crate::commands::GenConfig;
 
 pub fn convert_audio(
     app_handle: &tauri::AppHandle,
     yp: yomiage::Problem,
-    speed_scale: f64,
-    output_path: &str,
-    count_problems: u32,
+    GenConfig { count_problems, speed_scale, output_path, .. }: GenConfig,
+    dir_name: &str,
+    file_name: &str,
 ) -> Result<(), String> {
     let speaker_id = 13;
     let core = app_handle.state::<VoicevoxCore>();
@@ -30,11 +31,12 @@ pub fn convert_audio(
     }
 
     let mut path = std::path::PathBuf::from(output_path);
+    path.push(dir_name);
     if !path.exists() {
         std::fs::create_dir_all(&path).unwrap();
     }
 
-    path.push(get_file_name(yp.config));
+    path.push(file_name);
     let output_path = path.to_str().unwrap();
 
     // Meta
