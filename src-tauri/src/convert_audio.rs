@@ -2,7 +2,6 @@ use tauri::Manager;
 use vvcapi::VoicevoxCore;
 use yomiage;
 use hound::{WavReader, WavWriter};
-use chrono::Local;
 use std::io::Cursor;
 use crate::commands::GenConfig;
 
@@ -89,22 +88,4 @@ pub fn convert_audio(
     writer.finalize().unwrap();
 
     Ok(())
-}
-
-fn get_file_name(yomiage_config: yomiage::Config) -> String {
-    let min_digit = yomiage_config.min_digit.to_string();
-    let max_digit = yomiage_config.max_digit.to_string();
-    let length = yomiage_config.length.to_string();
-    let problem_type = if yomiage_config.subtractions == 0 {
-        String::from("加算")
-    } else {
-        String::from("加減算")
-    };
-    let timestamp = get_timestamp();
-
-    format!("{}-{}-{}-{}-{}.wav", min_digit, max_digit, length, timestamp, problem_type)
-}
-
-fn get_timestamp() -> String {
-    Local::now().format("%Y%m%d%H%M%S").to_string()
 }

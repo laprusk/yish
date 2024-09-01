@@ -2,6 +2,7 @@ use serde::{Serialize, Deserialize};
 use tauri::Manager;
 use chrono::Local;
 use crate::convert_audio::convert_audio;
+use std::sync::Mutex;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GenConfig {
@@ -37,6 +38,14 @@ pub async fn generate_audio(
         let dir_name = get_dir_name(yomiage_config);
 
         for i in 0..gen_config.count_problems {
+            // キャンセルされたら終了
+            let state = app_handle.state::<Mutex<bool>>();
+            let mut cancel_flag = state.lock().unwrap();
+            if *cancel_flag {
+                *cancel_flag = false;
+                break;
+            }
+
             // emit
             app_handle.emit_all(
                 "progress",
