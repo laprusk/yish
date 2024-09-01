@@ -4,6 +4,8 @@
 mod commands;
 mod convert_audio;
 
+use std::sync::Mutex;
+
 use tauri::Manager;
 use vvcapi::{VoicevoxCore, InitializeOptions};
 
@@ -16,6 +18,7 @@ fn greet(name: &str) -> String {
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
+            // Voicevox Coreインスタンス
             let core = VoicevoxCore::new(
                 InitializeOptions {
                     open_jtalk_dict_dir: "./open_jtalk_dic_utf_8-1.11".to_string(),
@@ -25,6 +28,19 @@ fn main() {
             println!("Voicevox Core version: {}", core.get_version());
 
             app.manage(core);
+
+            // 生成のキャンセルフラグ
+            let cancel_flag = Mutex::new(false);
+            app.manage(cancel_flag);
+
+            // キャンセルeventのlistener
+            let handle = app.handle();
+            let _id = app.listen_global("cancel-request", move |_event| {
+                handle.emit_all("progress", "キャンセル中...").unwrap();
+                let cancel_flag = handle.state::<Mutex<bool>>();
+                let mut cancel_flag = cancel_flag.lock().unwrap();
+                *cancel_flag = true;
+            });
 
             Ok(())
         })
