@@ -2,7 +2,6 @@ use tauri::Manager;
 use vvcapi::VoicevoxCore;
 use yomiage;
 use hound::{WavReader, WavWriter};
-use chrono::Local;
 use std::io::Cursor;
 use crate::commands::GenConfig;
 
@@ -63,12 +62,16 @@ pub fn convert_audio(
     let spec = reader_meta.spec();
     let mut writer = WavWriter::create(output_path, spec).unwrap();
 
-    // 0.5s silence and 3s silence
+    // make silence
+    let make_silence = |sec: f64| -> Vec<i16> {
+        vec![0_i16; (spec.sample_rate as f64 * sec) as usize]
+    };
     let sec1: f64 = 0.5;
     let sec2: f64 = 3.0;
-    let silence_duration = spec.sample_rate;
-    let silence1 = vec![0_i16; (silence_duration as f64 * sec1) as usize];
-    let silence2 = vec![0_i16; (silence_duration as f64 * sec2) as usize];
+    let sec3: f64 = 1.0;
+    let silence1 = make_silence(sec1);
+    let silence2 = make_silence(sec2);
+    let silence3 = make_silence(sec3);
 
     for sample in reader_meta.into_samples::<i16>() {
         writer.write_sample(sample.unwrap()).unwrap();
@@ -85,26 +88,11 @@ pub fn convert_audio(
     for sample in reader_answer.into_samples::<i16>() {
         writer.write_sample(sample.unwrap()).unwrap();
     }
+    for &sample in &silence3 {
+        writer.write_sample(sample).unwrap();
+    }
 
     writer.finalize().unwrap();
 
     Ok(())
-}
-
-fn get_file_name(yomiage_config: yomiage::Config) -> String {
-    let min_digit = yomiage_config.min_digit.to_string();
-    let max_digit = yomiage_config.max_digit.to_string();
-    let length = yomiage_config.length.to_string();
-    let problem_type = if yomiage_config.subtractions == 0 {
-        String::from("加算")
-    } else {
-        String::from("加減算")
-    };
-    let timestamp = get_timestamp();
-
-    format!("{}-{}-{}-{}-{}.wav", min_digit, max_digit, length, timestamp, problem_type)
-}
-
-fn get_timestamp() -> String {
-    Local::now().format("%Y%m%d%H%M%S").to_string()
 }

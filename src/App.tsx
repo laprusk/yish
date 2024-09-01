@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import { listen } from "@tauri-apps/api/event";
+import { listen, emit } from "@tauri-apps/api/event";
 import "./App.css";
 
 function App() {
@@ -76,6 +76,7 @@ function App() {
     console.log("generateAudio");
 
     if (isGenerating) {
+      emit("cancel-request", {});
       return;
     }
     setIsGenerating(true);
@@ -105,7 +106,6 @@ function App() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          getDefaultPath();
           generateAudio(yomiageConfig, genConfig);
         }}
       >
@@ -195,7 +195,7 @@ function App() {
           />
         </div>
         <button type="submit">
-          {isGenerating ? "生成中..." : "生成"}
+          {isGenerating ? "中断" : "生成"}
         </button>
       </form>
       <p>{progress}</p>
