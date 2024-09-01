@@ -51,7 +51,6 @@ jobs:
         run: |
           Invoke-WebRequest https://github.com/VOICEVOX/voicevox_core/releases/download/0.15.4/download-windows-x64.exe -OutFile download.exe
           .\download.exe --device directml -v 0.15.4 -o .\src-tauri\voicevox_core
-          Copy-Item .\src-tauri\voicevox_core\open_jtalk_dic_utf_8-1.11 -Destination .\src-tauri
 
       - uses: tauri-apps/tauri-action@v0
         env:

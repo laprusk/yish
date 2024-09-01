@@ -42,7 +42,8 @@
         "./voicevox_core/model": "model",
         "./voicevox_core/voicevox_core.dll": "./",
         "./voicevox_core/onnxruntime.dll": "./",
-        "./open_jtalk_dic_utf_8-1.11": "open_jtalk_dic_utf_8-1.11"
+        "./voicevox_core/DirectML.dll": "./",
+        "./voicevox_core/open_jtalk_dic_utf_8-1.11": "open_jtalk_dic_utf_8-1.11"
       }
     }
   }
